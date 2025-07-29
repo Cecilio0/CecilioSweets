@@ -1,0 +1,235 @@
+<div class="recipe-form-container">
+  <div class="form-header">
+    <h1>{{isEditMode ? 'Edit Recipe' : 'Create New Recipe'}}</h1>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading && isEditMode" class="loading">
+    Loading recipe...
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error-message">
+    {{error}}
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="recipeForm" (ngSubmit)="onSubmit()" class="recipe-form">
+    <!-- Basic Information -->
+    <div class="form-section">
+      <h2>Basic Information</h2>
+      
+      <div class="form-group">
+        <label for="title">Title *</label>
+        <input 
+          type="text" 
+          id="title" 
+          formControlName="title"
+          [class.invalid]="isFieldInvalid('title')"
+          placeholder="Enter recipe title"
+        >
+        <div *ngIf="isFieldInvalid('title')" class="error-text">
+          {{getFieldError('title')}}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description *</label>
+        <textarea 
+          id="description" 
+          formControlName="description"
+          [class.invalid]="isFieldInvalid('description')"
+          placeholder="Describe your recipe"
+          rows="3"
+        ></textarea>
+        <div *ngIf="isFieldInvalid('description')" class="error-text">
+          {{getFieldError('description')}}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="category">Category *</label>
+          <select 
+            id="category" 
+            formControlName="category"
+            [class.invalid]="isFieldInvalid('category')"
+          >
+            <option value="">Select category</option>
+            <option *ngFor="let category of categories" [value]="category">
+              {{category}}
+            </option>
+          </select>
+          <div *ngIf="isFieldInvalid('category')" class="error-text">
+            {{getFieldError('category')}}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="difficulty">Difficulty *</label>
+          <select 
+            id="difficulty" 
+            formControlName="difficulty"
+            [class.invalid]="isFieldInvalid('difficulty')"
+          >
+            <option value="">Select difficulty</option>
+            <option *ngFor="let difficulty of difficulties" [value]="difficulty">
+              {{difficulty}}
+            </option>
+          </select>
+          <div *ngIf="isFieldInvalid('difficulty')" class="error-text">
+            {{getFieldError('difficulty')}}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="prepTime">Prep Time (minutes) *</label>
+          <input 
+            type="number" 
+            id="prepTime" 
+            formControlName="prepTime"
+            [class.invalid]="isFieldInvalid('prepTime')"
+            min="1"
+          >
+          <div *ngIf="isFieldInvalid('prepTime')" class="error-text">
+            {{getFieldError('prepTime')}}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="cookTime">Cook Time (minutes) *</label>
+          <input 
+            type="number" 
+            id="cookTime" 
+            formControlName="cookTime"
+            [class.invalid]="isFieldInvalid('cookTime')"
+            min="1"
+          >
+          <div *ngIf="isFieldInvalid('cookTime')" class="error-text">
+            {{getFieldError('cookTime')}}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="servings">Servings *</label>
+          <input 
+            type="number" 
+            id="servings" 
+            formControlName="servings"
+            [class.invalid]="isFieldInvalid('servings')"
+            min="1"
+          >
+          <div *ngIf="isFieldInvalid('servings')" class="error-text">
+            {{getFieldError('servings')}}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="imageUrl">Image URL (optional)</label>
+        <input 
+          type="url" 
+          id="imageUrl" 
+          formControlName="imageUrl"
+          placeholder="https://example.com/image.jpg"
+        >
+      </div>
+    </div>
+
+    <!-- Ingredients -->
+    <div class="form-section">
+      <div class="section-header">
+        <h2>Ingredients</h2>
+        <button 
+          type="button" 
+          class="btn-add" 
+          (click)="addIngredient()"
+        >
+          Add Ingredient
+        </button>
+      </div>
+
+      <div formArrayName="ingredients" class="dynamic-list">
+        <div 
+          *ngFor="let ingredient of ingredients.controls; let i = index" 
+          [formGroupName]="i"
+          class="dynamic-item"
+        >
+          <input 
+            type="text" 
+            formControlName="value"
+            [class.invalid]="isIngredientInvalid(i)"
+            [placeholder]="'Ingredient ' + (i + 1)"
+          >
+          <button 
+            type="button" 
+            class="btn-remove" 
+            (click)="removeIngredient(i)"
+            [disabled]="ingredients.length === 1"
+          >
+            Remove
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="form-section">
+      <div class="section-header">
+        <h2>Instructions</h2>
+        <button 
+          type="button" 
+          class="btn-add" 
+          (click)="addInstruction()"
+        >
+          Add Step
+        </button>
+      </div>
+
+      <div formArrayName="instructions" class="dynamic-list">
+        <div 
+          *ngFor="let instruction of instructions.controls; let i = index" 
+          [formGroupName]="i"
+          class="dynamic-item"
+        >
+          <div class="instruction-number">{{i + 1}}.</div>
+          <textarea 
+            formControlName="value"
+            [class.invalid]="isInstructionInvalid(i)"
+            [placeholder]="'Step ' + (i + 1) + ' instructions'"
+            rows="2"
+          ></textarea>
+          <button 
+            type="button" 
+            class="btn-remove" 
+            (click)="removeInstruction(i)"
+            [disabled]="instructions.length === 1"
+          >
+            Remove
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button 
+        type="button" 
+        class="btn-cancel" 
+        (click)="cancel()"
+        [disabled]="loading"
+      >
+        Cancel
+      </button>
+      <button 
+        type="submit" 
+        class="btn-submit"
+        [disabled]="loading || recipeForm.invalid"
+      >
+        {{loading ? 'Saving...' : (isEditMode ? 'Update Recipe' : 'Create Recipe')}}
+      </button>
+    </div>
+  </form>
+</div>

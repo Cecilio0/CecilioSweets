@@ -1,0 +1,123 @@
+<div class="recipe-list-container">
+  <!-- Header -->
+  <div class="header">
+    <h1>Cecilio Sweets Recipes</h1>
+    <button 
+      *ngIf="isAuthenticated" 
+      class="btn-create" 
+      (click)="createRecipe()"
+    >
+      Create New Recipe
+    </button>
+  </div>
+
+  <!-- Search -->
+  <div class="search-container">
+    <input 
+      type="text" 
+      [(ngModel)]="searchTerm" 
+      placeholder="Search recipes..." 
+      class="search-input"
+      (keyup.enter)="onSearch()"
+    >
+    <button class="btn-search" (click)="onSearch()">Search</button>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="error-message">
+    {{error}}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    Loading recipes...
+  </div>
+
+  <!-- Recipe Grid -->
+  <div *ngIf="!loading && recipes.length > 0" class="recipes-grid">
+    <div 
+      *ngFor="let recipe of recipes" 
+      class="recipe-card"
+      (click)="viewRecipe(recipe)"
+    >
+      <div class="recipe-image">
+        <img 
+          [src]="recipe.imageUrl || 'assets/default-recipe.jpg'" 
+          [alt]="recipe.title"
+          onerror="this.src='assets/default-recipe.jpg'"
+        >
+        <div class="recipe-difficulty" [class]="getDifficultyClass(recipe.difficulty)">
+          {{recipe.difficulty}}
+        </div>
+      </div>
+      
+      <div class="recipe-content">
+        <h3 class="recipe-title">{{recipe.title}}</h3>
+        <p class="recipe-description">{{recipe.description}}</p>
+        
+        <div class="recipe-meta">
+          <div class="recipe-time">
+            <span>⏱️ {{getTotalTime(recipe)}} min</span>
+          </div>
+          <div class="recipe-servings">
+            <span>👥 {{recipe.servings}} servings</span>
+          </div>
+        </div>
+        
+        <div class="recipe-rating">
+          <app-rating 
+            [rating]="recipe.averageRating" 
+            [readonly]="true" 
+            size="small"
+          ></app-rating>
+          <span class="rating-count">({{recipe.totalRatings}})</span>
+        </div>
+        
+        <div class="recipe-author">
+          by {{recipe.authorName}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Results -->
+  <div *ngIf="!loading && recipes.length === 0" class="no-results">
+    <p>No recipes found.</p>
+    <button *ngIf="isAuthenticated" class="btn-create" (click)="createRecipe()">
+      Create the first recipe
+    </button>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="totalPages > 1" class="pagination">
+    <button 
+      class="page-btn" 
+      [disabled]="currentPage === 1"
+      (click)="onPageChange(currentPage - 1)"
+    >
+      Previous
+    </button>
+    
+    <button 
+      *ngFor="let page of getPaginationPages()" 
+      class="page-btn"
+      [class.active]="page === currentPage"
+      (click)="onPageChange(page)"
+    >
+      {{page}}
+    </button>
+    
+    <button 
+      class="page-btn" 
+      [disabled]="currentPage === totalPages"
+      (click)="onPageChange(currentPage + 1)"
+    >
+      Next
+    </button>
+  </div>
+
+  <!-- Results Info -->
+  <div *ngIf="total > 0" class="results-info">
+    Showing {{(currentPage - 1) * pageSize + 1}} - {{Math.min(currentPage * pageSize, total)}} of {{total}} recipes
+  </div>
+</div>

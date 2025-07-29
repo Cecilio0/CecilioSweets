@@ -1,0 +1,157 @@
+<div class="recipe-detail-container">
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    Loading recipe...
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error-message">
+    {{error}}
+    <button class="btn-back" (click)="goBack()">Go Back</button>
+  </div>
+
+  <!-- Recipe Content -->
+  <div *ngIf="recipe && !loading" class="recipe-content">
+    <!-- Header -->
+    <div class="recipe-header">
+      <button class="btn-back" (click)="goBack()">← Back to Recipes</button>
+      
+      <div class="recipe-actions" *ngIf="isOwner">
+        <button class="btn-edit" (click)="editRecipe()">Edit Recipe</button>
+        <button class="btn-delete" (click)="deleteRecipe()">Delete Recipe</button>
+      </div>
+    </div>
+
+    <!-- Recipe Info -->
+    <div class="recipe-info">
+      <div class="recipe-image-container">
+        <img 
+          [src]="recipe.imageUrl || 'assets/default-recipe.jpg'" 
+          [alt]="recipe.title"
+          class="recipe-image"
+          onerror="this.src='assets/default-recipe.jpg'"
+        >
+        <div class="recipe-difficulty" [class]="getDifficultyClass(recipe.difficulty)">
+          {{recipe.difficulty}}
+        </div>
+      </div>
+
+      <div class="recipe-details">
+        <h1 class="recipe-title">{{recipe.title}}</h1>
+        <p class="recipe-description">{{recipe.description}}</p>
+
+        <div class="recipe-meta">
+          <div class="meta-item">
+            <span class="meta-label">Category:</span>
+            <span class="meta-value">{{recipe.category}}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Prep Time:</span>
+            <span class="meta-value">{{recipe.prepTime}} min</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Cook Time:</span>
+            <span class="meta-value">{{recipe.cookTime}} min</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Total Time:</span>
+            <span class="meta-value">{{getTotalTime()}} min</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Servings:</span>
+            <span class="meta-value">{{recipe.servings}}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Author:</span>
+            <span class="meta-value">{{recipe.authorName}}</span>
+          </div>
+        </div>
+
+        <div class="recipe-rating-section">
+          <div class="current-rating">
+            <app-rating 
+              [rating]="recipe.averageRating" 
+              [readonly]="true" 
+              size="large"
+            ></app-rating>
+            <span class="rating-text">{{recipe.averageRating.toFixed(1)}} ({{recipe.totalRatings}} ratings)</span>
+          </div>
+          
+          <div *ngIf="isAuthenticated" class="user-rating">
+            <label>Rate this recipe:</label>
+            <app-rating 
+              [rating]="userRating" 
+              (ratingChange)="onRatingChange($event)"
+              size="medium"
+            ></app-rating>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ingredients and Instructions -->
+    <div class="recipe-content-section">
+      <div class="ingredients-section">
+        <h2>Ingredients</h2>
+        <ul class="ingredients-list">
+          <li *ngFor="let ingredient of recipe.ingredients">{{ingredient}}</li>
+        </ul>
+      </div>
+
+      <div class="instructions-section">
+        <h2>Instructions</h2>
+        <ol class="instructions-list">
+          <li *ngFor="let instruction of recipe.instructions">{{instruction}}</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Comments Section -->
+    <div class="comments-section">
+      <h2>Comments</h2>
+
+      <!-- Add Comment (if authenticated) -->
+      <div *ngIf="isAuthenticated" class="add-comment">
+        <textarea 
+          [(ngModel)]="newComment" 
+          placeholder="Add a comment..." 
+          class="comment-input"
+          rows="3"
+        ></textarea>
+        <button 
+          class="btn-add-comment" 
+          (click)="addComment()"
+          [disabled]="!newComment.trim()"
+        >
+          Add Comment
+        </button>
+      </div>
+
+      <!-- Login prompt -->
+      <div *ngIf="!isAuthenticated" class="login-prompt">
+        <p>Please <a href="/auth/login">login</a> to add comments and ratings.</p>
+      </div>
+
+      <!-- Comments Loading -->
+      <div *ngIf="commentsLoading" class="comments-loading">
+        Loading comments...
+      </div>
+
+      <!-- Comments List -->
+      <div class="comments-list">
+        <app-comment 
+          *ngFor="let comment of comments"
+          [comment]="comment"
+          [canEdit]="canEditComment(comment)"
+          (commentDeleted)="onCommentDeleted($event)"
+          (commentUpdated)="onCommentUpdated($event)"
+        ></app-comment>
+      </div>
+
+      <!-- No Comments -->
+      <div *ngIf="!commentsLoading && comments.length === 0" class="no-comments">
+        <p>No comments yet. Be the first to comment!</p>
+      </div>
+    </div>
+  </div>
+</div>

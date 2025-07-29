@@ -1,0 +1,75 @@
+<div class="comment">
+  <div class="comment-header">
+    <span class="comment-author">{{comment.userName}}</span>
+    <span class="comment-date">{{getTimeAgo(comment.createdAt)}}</span>
+    <div class="comment-actions" *ngIf="canEdit">
+      <button 
+        type="button" 
+        class="btn-edit" 
+        (click)="startEdit()"
+        [disabled]="loading"
+      >
+        Edit
+      </button>
+      <button 
+        type="button" 
+        class="btn-delete" 
+        (click)="deleteComment()"
+        [disabled]="loading"
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+
+  <div class="comment-content" *ngIf="!isEditing">
+    {{comment.content}}
+  </div>
+
+  <div class="comment-edit" *ngIf="isEditing">
+    <textarea 
+      [(ngModel)]="editContent" 
+      class="edit-textarea"
+      rows="3"
+      [disabled]="loading"
+    ></textarea>
+    <div class="edit-actions">
+      <button 
+        type="button" 
+        class="btn-save" 
+        (click)="saveEdit()"
+        [disabled]="loading || !editContent.trim()"
+      >
+        {{loading ? 'Saving...' : 'Save'}}
+      </button>
+      <button 
+        type="button" 
+        class="btn-cancel" 
+        (click)="cancelEdit()"
+        [disabled]="loading"
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+
+  <div class="comment-voting">
+    <button 
+      type="button" 
+      class="vote-btn upvote" 
+      [class.active]="comment.userVote === 'up'"
+      (click)="vote('up')"
+    >
+      ▲
+    </button>
+    <span class="vote-count">{{comment.votes}}</span>
+    <button 
+      type="button" 
+      class="vote-btn downvote" 
+      [class.active]="comment.userVote === 'down'"
+      (click)="vote('down')"
+    >
+      ▼
+    </button>
+  </div>
+</div>

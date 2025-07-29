@@ -22,13 +22,13 @@ A full-stack web application for sharing and discovering dessert recipes with us
 - **Authentication**: JWT tokens with secure storage
 
 ### Backend
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Database**: MongoDB with Mongoose ODM
+- **Runtime**: Python
+- **Framework**: FastAPI
+- **Database**: MongoDB with Motor (async driver)
 - **Authentication**: JWT (JSON Web Tokens)
 - **Password Security**: bcrypt for hashing
-- **Validation**: express-validator
-- **File Upload**: Multer (for recipe images)
+- **Validation**: Pydantic models
+- **File Upload**: FastAPI file upload handling
 
 ### Database Schema
 - **Users**: Authentication, profiles, preferences
@@ -50,7 +50,8 @@ CecilioSweets/
 ## Getting Started
 
 ### Prerequisites
-- Node.js (v16 or higher)
+- Python (v3.8 or higher)
+- Node.js (v16 or higher) for frontend
 - npm or yarn
 - MongoDB (local or cloud instance)
 
@@ -65,7 +66,7 @@ cd CecilioSweets
 2. Install backend dependencies:
 ```bash
 cd backend
-npm install
+pip install -r requirements.txt
 ```
 
 3. Install frontend dependencies:
@@ -82,7 +83,7 @@ npm install
 ```bash
 # Terminal 1 - Backend
 cd backend
-npm run dev
+uvicorn main:app --reload
 
 # Terminal 2 - Frontend
 cd frontend

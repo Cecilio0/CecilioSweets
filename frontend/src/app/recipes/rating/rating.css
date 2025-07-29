@@ -1,0 +1,52 @@
+.rating-container {
+  display: inline-flex;
+  align-items: center;
+}
+
+.star-wrapper {
+  cursor: pointer;
+  display: inline-block;
+  transition: transform 0.1s ease;
+}
+
+.star-wrapper:hover {
+  transform: scale(1.1);
+}
+
+.star {
+  color: #ddd;
+  transition: color 0.2s ease;
+}
+
+.star.filled {
+  color: #ffc107;
+}
+
+.star.half-filled {
+  color: #ffc107;
+  opacity: 0.5;
+}
+
+.star.empty {
+  color: #ddd;
+}
+
+.star.small {
+  font-size: 16px;
+}
+
+.star.medium {
+  font-size: 20px;
+}
+
+.star.large {
+  font-size: 24px;
+}
+
+.readonly .star-wrapper {
+  cursor: default;
+}
+
+.readonly .star-wrapper:hover {
+  transform: none;
+}
