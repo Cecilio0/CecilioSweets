@@ -26,10 +26,10 @@
     <div class="recipe-info">
       <div class="recipe-image-container">
         <img 
-          [src]="recipe.imageUrl || 'assets/default-recipe.jpg'" 
+          [src]="getRecipeImageUrl()"
           [alt]="recipe.title"
           class="recipe-image"
-          onerror="this.src='assets/default-recipe.jpg'"
+          onerror="this.src=getRecipeImageUrl()"
         >
         <div class="recipe-difficulty" [class]="getDifficultyClass(recipe.difficulty)">
           {{recipe.difficulty}}
@@ -47,11 +47,11 @@
           </div>
           <div class="meta-item">
             <span class="meta-label">Prep Time:</span>
-            <span class="meta-value">{{recipe.prepTime}} min</span>
+            <span class="meta-value">{{recipe.prep_time}} min</span>
           </div>
           <div class="meta-item">
             <span class="meta-label">Cook Time:</span>
-            <span class="meta-value">{{recipe.cookTime}} min</span>
+            <span class="meta-value">{{recipe.cook_time}} min</span>
           </div>
           <div class="meta-item">
             <span class="meta-label">Total Time:</span>
@@ -63,18 +63,18 @@
           </div>
           <div class="meta-item">
             <span class="meta-label">Author:</span>
-            <span class="meta-value">{{recipe.authorName}}</span>
+            <span class="meta-value">{{recipe.author.username}}</span>
           </div>
         </div>
 
         <div class="recipe-rating-section">
           <div class="current-rating">
             <app-rating 
-              [rating]="recipe.averageRating" 
+              [rating]="recipe.average_rating" 
               [readonly]="true" 
               size="large"
             ></app-rating>
-            <span class="rating-text">{{recipe.averageRating.toFixed(1)}} ({{recipe.totalRatings}} ratings)</span>
+            <span class="rating-text">{{recipe.average_rating}} ({{recipe.rating_count}} ratings)</span>
           </div>
           
           <div *ngIf="isAuthenticated" class="user-rating">
@@ -93,16 +93,20 @@
     <div class="recipe-content-section">
       <div class="ingredients-section">
         <h2>Ingredients</h2>
-        <ul class="ingredients-list">
-          <li *ngFor="let ingredient of recipe.ingredients">{{ingredient}}</li>
-        </ul>
+        <div class="ingredients-content">
+          <ul class="ingredients-list">
+            <li *ngFor="let ingredient of getIngredientsArray()">{{ingredient}}</li>
+          </ul>
+        </div>
       </div>
 
       <div class="instructions-section">
         <h2>Instructions</h2>
-        <ol class="instructions-list">
-          <li *ngFor="let instruction of recipe.instructions">{{instruction}}</li>
-        </ol>
+        <div class="instructions-content">
+          <ol class="instructions-list">
+            <li *ngFor="let instruction of getInstructionsArray()">{{instruction}}</li>
+          </ol>
+        </div>
       </div>
     </div>
 

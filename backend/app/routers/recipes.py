@@ -4,12 +4,12 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.database import get_db
 from app.models import Recipe, User, Rating
-from app.schemas import Recipe as RecipeSchema, RecipeCreate, RecipeUpdate
+from app.schemas import Recipe as RecipeSchema, RecipeCreate, RecipeUpdate, RecipeListResponse
 from app.auth import get_current_active_user
 
 router = APIRouter()
 
-@router.get("/", response_model=List[RecipeSchema])
+@router.get("/", response_model=RecipeListResponse)
 def read_recipes(
     skip: int = 0,
     limit: int = 100,
@@ -21,6 +21,10 @@ def read_recipes(
     if search:
         query = query.filter(Recipe.title.contains(search))
     
+    # Get total count before applying pagination
+    total = query.count()
+    
+    # Apply pagination
     recipes = query.offset(skip).limit(limit).all()
     
     # Add average rating to each recipe
@@ -30,7 +34,10 @@ def read_recipes(
         recipe.average_rating = round(avg_rating, 2) if avg_rating else None
         recipe.rating_count = rating_count
     
-    return recipes
+    return RecipeListResponse(
+        recipes=recipes,
+        total=total
+    )
 
 @router.post("/", response_model=RecipeSchema)
 def create_recipe(

@@ -123,8 +123,8 @@ export class RecipeForm implements OnInit {
       description: recipe.description,
       category: recipe.category,
       difficulty: recipe.difficulty,
-      prepTime: recipe.prepTime,
-      cookTime: recipe.cookTime,
+      prepTime: recipe.prep_time,
+      cookTime: recipe.cook_time,
       servings: recipe.servings,
       imageUrl: recipe.imageUrl || ''
     });

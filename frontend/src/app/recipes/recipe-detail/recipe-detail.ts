@@ -8,6 +8,8 @@ import { RecipeService } from '../recipe';
 import { AuthService } from '../../auth/auth';
 import { RatingComponent } from '../rating/rating';
 import { CommentComponent } from '../comment/comment';
+import { getDefaultRecipeImage } from '../../shared/utils/assets';
+import { CommentService } from '../comment.service';
 
 @Component({
   selector: 'app-recipe-detail',
@@ -29,6 +31,7 @@ export class RecipeDetail implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private recipeService: RecipeService,
+    private commentService: CommentService,
     private authService: AuthService
   ) {}
 
@@ -59,7 +62,7 @@ export class RecipeDetail implements OnInit {
         
         // Check if current user is the owner
         this.authService.currentUser$.subscribe(user => {
-          this.isOwner = user?.id === recipe.authorId;
+          this.isOwner = user?.id === recipe.author.id;
         });
       },
       error: () => {
@@ -71,8 +74,8 @@ export class RecipeDetail implements OnInit {
 
   loadComments(recipeId: string): void {
     this.commentsLoading = true;
-    
-    this.recipeService.getRecipeComments(recipeId).subscribe({
+
+    this.commentService.getRecipeComments(recipeId).subscribe({
       next: (comments) => {
         this.comments = comments;
         this.commentsLoading = false;
@@ -97,7 +100,7 @@ export class RecipeDetail implements OnInit {
 
   addComment(): void {
     if (this.newComment.trim() && this.recipe && this.isAuthenticated) {
-      this.recipeService.addComment(this.recipe.id, this.newComment).subscribe({
+      this.commentService.createComment(this.recipe.id, this.newComment).subscribe({
         next: (comment) => {
           this.comments.unshift(comment);
           this.newComment = '';
@@ -138,7 +141,7 @@ export class RecipeDetail implements OnInit {
   }
 
   getTotalTime(): number {
-    return this.recipe ? this.recipe.prepTime + this.recipe.cookTime : 0;
+    return this.recipe ? this.recipe.prep_time + this.recipe.cook_time : 0;
   }
 
   getDifficultyClass(difficulty: string): string {
@@ -159,5 +162,47 @@ export class RecipeDetail implements OnInit {
     }).unsubscribe();
     
     return canEdit;
+  }
+
+  getRecipeImageUrl(): string {
+    return this.recipe?.imageUrl || getDefaultRecipeImage();
+  }
+
+  getIngredientsArray(): string[] {
+    if (!this.recipe?.ingredients) return [];
+    
+    // If it's already an array, return it
+    if (Array.isArray(this.recipe.ingredients)) {
+      return this.recipe.ingredients;
+    }
+    
+    // If it's a string, parse it into an array
+    const ingredientsString = this.recipe.ingredients as unknown as string;
+    return ingredientsString
+      .split('\n')
+      .map(ingredient => ingredient.trim())
+      .filter(ingredient => ingredient.length > 0)
+      .map(ingredient => ingredient.startsWith('-') ? ingredient.substring(1).trim() : ingredient);
+  }
+
+  getInstructionsArray(): string[] {
+    if (!this.recipe?.instructions) return [];
+    
+    // If it's already an array, return it
+    if (Array.isArray(this.recipe.instructions)) {
+      return this.recipe.instructions;
+    }
+    
+    // If it's a string, parse it into an array
+    const instructionsString = this.recipe.instructions as unknown as string;
+    return instructionsString
+      .split('\n')
+      .map(instruction => instruction.trim())
+      .filter(instruction => instruction.length > 0)
+      .map((instruction, index) => {
+        // Remove leading numbers if they exist (e.g., "1. Mix ingredients" -> "Mix ingredients")
+        const cleaned = instruction.replace(/^\d+\.\s*/, '');
+        return cleaned;
+      });
   }
 }

@@ -66,6 +66,11 @@ class Recipe(RecipeBase):
     class Config:
         from_attributes = True
 
+# Paginated response schema
+class RecipeListResponse(BaseModel):
+    recipes: List["Recipe"]
+    total: int
+
 # Comment schemas
 class CommentBase(BaseModel):
     content: str

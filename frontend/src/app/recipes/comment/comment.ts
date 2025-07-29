@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Comment } from '../models/comment';
 import { AuthService } from '../../auth/auth';
 import { RecipeService } from '../recipe';
+import { CommentService } from '../comment.service';
 
 @Component({
   selector: 'app-comment',
@@ -23,7 +24,8 @@ export class CommentComponent {
 
   constructor(
     private authService: AuthService,
-    private recipeService: RecipeService
+    private recipeService: RecipeService,
+    private commentService: CommentService,
   ) {}
 
   ngOnInit(): void {
@@ -47,7 +49,7 @@ export class CommentComponent {
   saveEdit(): void {
     if (this.editContent.trim() && this.editContent !== this.comment.content) {
       this.loading = true;
-      this.recipeService.updateComment(this.comment.id, this.editContent).subscribe({
+      this.commentService.updateComment(this.comment.id, this.editContent).subscribe({
         next: (updatedComment) => {
           this.comment = updatedComment;
           this.isEditing = false;
@@ -66,7 +68,7 @@ export class CommentComponent {
   deleteComment(): void {
     if (confirm('Are you sure you want to delete this comment?')) {
       this.loading = true;
-      this.recipeService.deleteComment(this.comment.id).subscribe({
+      this.commentService.deleteComment(this.comment.id).subscribe({
         next: () => {
           this.commentDeleted.emit(this.comment.id);
         },
@@ -80,7 +82,7 @@ export class CommentComponent {
   vote(voteType: 'up' | 'down'): void {
     if (this.comment.userVote === voteType) {
       // Remove vote if clicking the same vote
-      this.recipeService.removeCommentVote(this.comment.id).subscribe({
+      this.commentService.removeCommentVote(this.comment.id).subscribe({
         next: () => {
           const voteChange = voteType === 'up' ? -1 : 1;
           this.comment.votes += voteChange;
@@ -88,7 +90,7 @@ export class CommentComponent {
         }
       });
     } else {
-      this.recipeService.voteComment(this.comment.id, voteType).subscribe({
+      this.commentService.voteComment(this.comment.id, voteType).subscribe({
         next: () => {
           let voteChange = 0;
           if (this.comment.userVote === 'up') {

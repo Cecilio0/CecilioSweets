@@ -1,5 +1,14 @@
 <div class="recipe-list-container">
-  <!-- Header -->
+  <!--      <div class="recipe-image">
+        <img 
+          [src]="recipe.imageUrl || 'assets/images/default-recipe.svg'" 
+          [alt]="recipe.title"
+          onerror="this.src='assets/images/default-recipe.svg'"
+        >
+        <div class="recipe-difficulty" [class]="getDifficultyClass(recipe.difficulty)">
+          {{recipe.difficulty}}
+        </div>
+      </div>>
   <div class="header">
     <h1>Cecilio Sweets Recipes</h1>
     <button 
@@ -42,9 +51,9 @@
     >
       <div class="recipe-image">
         <img 
-          [src]="recipe.imageUrl || 'assets/default-recipe.jpg'" 
+          [src]="getRecipeImageUrl(recipe)"
           [alt]="recipe.title"
-          onerror="this.src='assets/default-recipe.jpg'"
+          onerror="this.src=getRecipeImageUrl(recipe)"
         >
         <div class="recipe-difficulty" [class]="getDifficultyClass(recipe.difficulty)">
           {{recipe.difficulty}}
@@ -66,15 +75,15 @@
         
         <div class="recipe-rating">
           <app-rating 
-            [rating]="recipe.averageRating" 
+            [rating]="recipe.average_rating" 
             [readonly]="true" 
             size="small"
           ></app-rating>
-          <span class="rating-count">({{recipe.totalRatings}})</span>
+          <span class="rating-count">({{recipe.rating_count}})</span>
         </div>
         
         <div class="recipe-author">
-          by {{recipe.authorName}}
+          by {{recipe.author.username}}
         </div>
       </div>
     </div>

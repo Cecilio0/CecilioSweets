@@ -6,6 +6,7 @@ import { Recipe } from '../models/recipe';
 import { RecipeService } from '../recipe';
 import { AuthService } from '../../auth/auth';
 import { RatingComponent } from '../rating/rating';
+import { getDefaultRecipeImage } from '../../shared/utils/assets';
 
 @Component({
   selector: 'app-recipe-list',
@@ -86,8 +87,12 @@ export class RecipeList implements OnInit {
     }
   }
 
+  getRecipeImageUrl(recipe: Recipe): string {
+    return recipe.imageUrl || getDefaultRecipeImage();
+  }
+
   getTotalTime(recipe: Recipe): number {
-    return recipe.prepTime + recipe.cookTime;
+    return recipe.prep_time + recipe.cook_time;
   }
 
   getPaginationPages(): number[] {
