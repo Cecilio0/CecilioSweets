@@ -121,10 +121,6 @@ celerybeat.pid
 
 # Environments
 .env
-.env.local
-.env.development
-.env.test
-.env.production
 .venv
 env/
 venv/
@@ -156,25 +152,44 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# Database
+# PyCharm
+#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
+#  be added to the global gitignore or merged into this project gitignore.  For a PyCharm
+#  project, it is advised to exclude the entire .idea directory.
+#  Comment these lines if you want to include your .idea directory files.
+.idea/
+
+# FastAPI specific
 *.db
 *.sqlite
 *.sqlite3
 
+# Database files
+*.db-journal
+postgresql_data/
+mysql_data/
+
 # Alembic
-alembic.ini
+# Uncomment if you want to ignore migration files (not recommended for production)
+# alembic/versions/
 
-# FastAPI specific
-.fastapi/
+# Log files
+*.log
+logs/
 
-# IDE specific files
-.vscode/
-.idea/
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/settings.json
 *.swp
 *.swo
 *~
 
-# OS specific files
+# OS generated files
 .DS_Store
 .DS_Store?
 ._*
@@ -183,26 +198,10 @@ alembic.ini
 ehthumbs.db
 Thumbs.db
 
-# Logs
-logs/
-*.log
+# Docker
+docker-compose.override.yml
+.dockerignore
 
-# Temporary files
-tmp/
-temp/
-.tmp/
-
-# Upload directories (if you have file uploads)
-uploads/
-media/
-static/uploads/
-
-# SSL certificates (if any)
-*.pem
-*.key
-*.crt
-*.cert
-
-# Backup files
-*.bak
-*.backup
+# Local configuration files
+config.local.py
+settings.local.py
