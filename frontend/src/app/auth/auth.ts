@@ -1,62 +1,83 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { Injectable, inject, OnDestroy } from '@angular/core';
+import { OidcSecurityService } from 'angular-auth-oidc-client';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { User } from './models/user';
-import { LoginRequest } from './models/login-request';
-import { RegisterRequest } from './models/register-request';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
-  private apiUrl = 'http://localhost:8000/api/auth';
+export class AuthService implements OnDestroy {
+  private readonly oidcSecurityService = inject(OidcSecurityService);
+
+  configuration$ = this.oidcSecurityService.getConfiguration();
+  userData$ = this.oidcSecurityService.userData$;
+
+  private _isAuthenticated = new BehaviorSubject<boolean>(false);
+  public readonly isAuthenticated$ = this._isAuthenticated.asObservable();
+  
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private http: HttpClient) {
-    const token = localStorage.getItem('token');
-    if (token) {
-      this.loadUserProfile();
-    }
+  private subscription = new Subscription();
+
+  constructor() {
+    this.initializeAuth();
   }
 
-  login(credentials: LoginRequest): Observable<{access_token: string, user: User}> {
-    return this.http.post<{access_token: string, user: User}>(`${this.apiUrl}/login`, credentials)
-      .pipe(
-        tap(response => {
-          localStorage.setItem('token', response.access_token);
-          this.currentUserSubject.next(response.user);
-        })
-      );
+  private initializeAuth(): void {
+    this.subscription.add(
+      this.oidcSecurityService.isAuthenticated$.subscribe(
+        ({ isAuthenticated }) => {
+          this._isAuthenticated.next(isAuthenticated);
+          console.warn('authenticated: ', isAuthenticated);
+          
+          if (isAuthenticated) {
+            this.loadUserFromCognito();
+          } else {
+            this.currentUserSubject.next(null);
+          }
+        }
+      )
+    );
   }
 
-  register(userData: RegisterRequest): Observable<{access_token: string, user: User}> {
-    return this.http.post<{access_token: string, user: User}>(`${this.apiUrl}/register`, userData)
-      .pipe(
-        tap(response => {
-          localStorage.setItem('token', response.access_token);
-          this.currentUserSubject.next(response.user);
-        })
-      );
+  private loadUserFromCognito(): void {
+    this.userData$.subscribe(userData => {
+      if (userData && userData.userData) {
+        // Map Cognito user data to your User model
+        const cognitoUser = userData.userData;
+        const user: User = {
+          id: cognitoUser['sub'] || cognitoUser['cognito:username'] || '',
+          username: cognitoUser['preferred_username'] || cognitoUser['cognito:username'] || cognitoUser['email'] || '',
+          email: cognitoUser['email'] || '',
+          createdAt: new Date()
+        };
+        this.currentUserSubject.next(user);
+      }
+    });
+  }
+
+  login(): void {
+    this.oidcSecurityService.authorize();
   }
 
   logout(): void {
-    localStorage.removeItem('token');
-    this.currentUserSubject.next(null);
+    this.oidcSecurityService.logoff();
   }
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('token');
+    return this._isAuthenticated.getValue();
   }
 
-  getToken(): string | null {
-    return localStorage.getItem('token');
+  getCurrentUser(): User | null {
+    return this.currentUserSubject.getValue();
   }
 
-  private loadUserProfile(): void {
-    this.http.get<User>(`${this.apiUrl}/profile`).subscribe({
-      next: (user) => this.currentUserSubject.next(user),
-      error: () => this.logout()
-    });
+  getAccessToken(): Observable<string> {
+    return this.oidcSecurityService.getAccessToken();
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }

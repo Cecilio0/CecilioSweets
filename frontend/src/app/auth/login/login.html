@@ -1,49 +1,43 @@
-<div class="login-container">
-  <div class="login-card">
-    <h2>Login to CecilioSweets</h2>
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h1>Welcome to CecilioSweets</h1>
+      <p>Sign in to your account to continue</p>
+    </div>
     
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input 
-          type="email" 
-          id="email" 
-          formControlName="email"
-          [class.error]="email?.invalid && email?.touched"
+    <div *ngIf="authService.isAuthenticated$ | async; else loginContent" class="auth-success">
+      <div class="success-icon">✓</div>
+      <h3>You're already signed in!</h3>
+      <p>Redirecting to your recipes...</p>
+    </div>
+
+    <ng-template #loginContent>
+      <div class="auth-content">
+        <button 
+          (click)="login()" 
+          [disabled]="loading"
+          class="auth-btn primary"
         >
-        <div *ngIf="email?.invalid && email?.touched" class="error-message">
-          <span *ngIf="email?.errors?.['required']">Email is required</span>
-          <span *ngIf="email?.errors?.['email']">Please enter a valid email</span>
+          <span *ngIf="!loading" class="btn-content">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            Sign In with AWS Cognito
+          </span>
+          <span *ngIf="loading" class="btn-loading">
+            <div class="spinner"></div>
+            Connecting...
+          </span>
+        </button>
+
+        <div class="auth-info">
+          <p>Secure authentication powered by AWS Cognito</p>
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input 
-          type="password" 
-          id="password" 
-          formControlName="password"
-          [class.error]="password?.invalid && password?.touched"
-        >
-        <div *ngIf="password?.invalid && password?.touched" class="error-message">
-          <span *ngIf="password?.errors?.['required']">Password is required</span>
-          <span *ngIf="password?.errors?.['minlength']">Password must be at least 6 characters</span>
-        </div>
+      <div class="auth-footer">
+        <p>Don't have an account? <a routerLink="/auth/register" class="auth-link">Create one here</a></p>
       </div>
-
-      <div *ngIf="error" class="error-message">{{ error }}</div>
-
-      <button 
-        type="submit" 
-        [disabled]="loginForm.invalid || loading"
-        class="login-btn"
-      >
-        {{ loading ? 'Logging in...' : 'Login' }}
-      </button>
-    </form>
-
-    <p class="register-link">
-      Don't have an account? <a routerLink="/auth/register">Register here</a>
-    </p>
+    </ng-template>
   </div>
 </div>

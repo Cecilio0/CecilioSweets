@@ -1,48 +1,33 @@
-import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [CommonModule],
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
-export class LoginComponent {
-  loginForm: FormGroup;
+export class LoginComponent implements OnInit {
   loading = false;
-  error = '';
 
   constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
+    public authService: AuthService,
     private router: Router
-  ) {
-    this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+  ) {}
+
+  ngOnInit(): void {
+    this.authService.isAuthenticated$.subscribe(isAuthenticated => {
+      console.log('LoginComponent: isAuthenticated', isAuthenticated);
+      if (isAuthenticated) {
+        this.router.navigate(['/recipes']);
+      }
     });
   }
 
-  onSubmit(): void {
-    if (this.loginForm.valid) {
-      this.loading = true;
-      this.error = '';
-      
-      this.authService.login(this.loginForm.value).subscribe({
-        next: () => {
-          this.router.navigate(['/recipes']);
-        },
-        error: (err) => {
-          this.error = err.error?.message || 'Login failed';
-          this.loading = false;
-        }
-      });
-    }
+  login(): void {
+    this.loading = true;
+    this.authService.login();
   }
-
-  get email() { return this.loginForm.get('email'); }
-  get password() { return this.loginForm.get('password'); }
 }
